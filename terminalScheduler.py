@@ -248,6 +248,16 @@ class state:
             "Job": job          #Either load or unload
             }
         
+    #Can be run to do a full scan of the hangars/planes/trucks/forklifts to see if any constraints are being violated
+    def checkConstrain(self):
+        #First check locational constraints, like is there a forklift scheduled multiple times
+        #This only refers to individual objects meaning that it doesnt necessarily check for overlaps (yet)
+
+        #Second check for time constrains (inviduals), is an object scheduled for something either before or after start/stop?
+
+        #Third check for timeoverlap constrains, meaning that two or more objects cannot be in one place at a time.
+        #This is different from the previous checks in that it will be comparing multiple objects against each other
+        return False
 def read_file(filename):
     with open(filename, "r") as file:
         return file.read()
