@@ -189,7 +189,8 @@ class state:
                 aircraft.departure = aircraft.arrival + 20
 
 
-
+    def scheduleForklift(self):
+        for
 
     
 def read_file(filename):
