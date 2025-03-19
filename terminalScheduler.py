@@ -54,10 +54,19 @@ class Aircraft:
         self.arrival = arrival
         self.departure = -1
         self.cargo = cargo
+        self.hangar = None
 
+    def setHangar(self, hangar):
+        if hangar.aircraft is not None:
+            return False
+        self.hangar = hangar
+        
     def setDeparture(self, time):
         self.departure = time
 
+    def getCargo(self):
+        return self.cargo
+    
     def __str__(self):
         return f'Aircraft id : {self.id} | Arrival Time : {self.arrival} | Cargo : {self.cargo}'  
     
@@ -79,10 +88,18 @@ class Hangar:
 
     def addTruck(self, truck):
         self.trucks.append(truck)
-
+    
+    def setPallet(self, pallets):
+        if pallets < 0:
+            return False
+        self.pallets = pallets
     
     def addForklift(self, Forklift):
         self.forklifts.append(Forklift)
+
+
+    def getPallets(self):
+        return self.pallets
 
     def __str__(self):
         return f'Hangar id : {self.id} | Aircraft : {self.aircraft} | Pallets : {self.pallets} | Trucks : {self.trucks}'  
@@ -95,9 +112,10 @@ class Forklifts:
         self.id = id
         self.schedule = []
 
-    def add_job(self, hangar, time, job):
+    def addUnload(self, aircraft:Aircraft, time, job):
+
         newJob = {
-            "Hangar": hangar,   #ID of hangar
+            "Hangar": aircraft.hangar,   #ID of hangar
             "Time": time,       #time in format
             "Job": job          #Either load or unload
             }
@@ -172,8 +190,19 @@ class state:
     def __init__(self, MetaData: Meta):
         self.start = MetaData.start
         self.stop = MetaData.stop
-        self.hangars = MetaData.Hangars
-        self.forklifts = MetaData.forklifts
+        
+        #Init hangar objects
+        metaHangars = []
+        for hangar in MetaData.Hangars:
+            metaHangars.append(Hangar(hangar))
+        self.hangars = metaHangars
+       
+        #Init Fork objects
+        metaFork = []
+        for Fork in MetaData.forklifts:
+            metaFork.append(Forklifts(Fork))
+        self.forklifts = metaFork
+    
         self.trucks = []  
         self.schedule = {
             "aircraft": {},
@@ -186,13 +215,39 @@ class state:
         for hangar in self.hangars:
             if hangar.Aircraft is None:
                 hangar.Aircraft = aircraft
-                aircraft.departure = aircraft.arrival + 20
+                aircraft.setHangar(hangar)
+                aircraft.departure = aircraft.arrival + 20*aircraft.cargo
+                
+                new_aircraft = {aircraft.id : {
+                    "Hangar": aircraft.hangar,
+                    "Arrival": aircraft.arrival,
+                    "Departure": aircraft.departure}}
+                
+                self.schedule["aircraft"][aircraft.id] = new_aircraft
+
+                return True
+        print("No hangars possible")
+        return False
+
+    #The add job assumes that the aircraft is in a hangar, it will get the hangar information through the aircraft
+    def unloadForklift(self, aircraft):
+        if aircraft.hangar is None:
+            print(f"No Hangar{aircraft}")
+            return False
+        for forklift in self.forklifts.values():
+            if len(forklift.schedule) == 0: #If fork lift schedule is empty assign to plane
+                for i in range(aircraft.getCargo()):
+                    forklift.addUnload(aircraft, aircraft.arrival , "Unload")
 
 
-    def scheduleForklift(self):
-        for
 
-    
+        def add_job(self, hangar, time, job):
+        newJob = {
+            "Hangar": hangar,   #ID of hangar
+            "Time": time,       #time in format
+            "Job": job          #Either load or unload
+            }
+        
 def read_file(filename):
     with open(filename, "r") as file:
         return file.read()
