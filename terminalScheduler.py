@@ -52,10 +52,14 @@ class Aircraft:
     def __init__(self, id, arrival, cargo):
         self.id = id
         self.arrival = arrival
+        self.departure = -1
         self.cargo = cargo
 
+    def setDeparture(self, time):
+        self.departure = time
+
     def __str__(self):
-        return f'\nAircraft id : {self.id} | Arrival Time : {self.arrival} | Cargo : {self.cargo}'  
+        return f'Aircraft id : {self.id} | Arrival Time : {self.arrival} | Cargo : {self.cargo}'  
     
     def __repr__(self):
         return self.__str__()
@@ -68,6 +72,7 @@ class Hangar:
         self.aircraft = None
         self.pallets = 0
         self.trucks = []
+        self.forklifts = []
 
     def addPlane(self, aircraft):
         self.aircraft = aircraft
@@ -75,8 +80,12 @@ class Hangar:
     def addTruck(self, truck):
         self.trucks.append(truck)
 
+    
+    def addForklift(self, Forklift):
+        self.forklifts.append(Forklift)
+
     def __str__(self):
-        return f'\nHangar id : {self.id} | Aircraft : {self.aircraft} | Pallets : {self.pallets} | Trucks : {self.trucks}'  
+        return f'Hangar id : {self.id} | Aircraft : {self.aircraft} | Pallets : {self.pallets} | Trucks : {self.trucks}'  
     
     def __repr__(self):
         return self.__str__()
@@ -96,7 +105,7 @@ class Forklifts:
         self.schedule.append(newJob)
     
     def __str__(self):
-        return f'\nForklift id : {self.id} | Schedule : {self.schedule}' 
+        return f'Forklift id : {self.id} | Schedule : {self.schedule}\n' 
     
     def __repr__(self):
         return self.__str__()
@@ -109,13 +118,13 @@ class Truck:
         self.Hangar = None
     
     def __str__(self):
-        return f'\nTruck id : {self.id} | Arrival Time : {self.time} | Hangar : {self.Hangar}'  
+        return f'Truck id : {self.id} | Arrival Time : {self.time} | Hangar : {self.Hangar}'  
     
     def __repr__(self):
         return self.__str__()
 
 
-
+#There can only be one Meta per instance
 class Meta:
     def __init__(self, start, stop, Hangars, forklifts):
         self.start = start
@@ -125,7 +134,7 @@ class Meta:
     
 
     def __str__(self):
-        return f'\n Meta Start: {self.start} | Stop Time : {self.stop} | Hangars : {self.Hangars}, Forklifts : {self.forklifts}'  
+        return f'Meta Start: {self.start} | Stop Time : {self.stop} | Hangars : {self.Hangars}, Forklifts : {self.forklifts}'  
     
     def __repr__(self):
         return self.__str__()
@@ -150,7 +159,7 @@ class Parser:
         )
         return ret_data
     
-    def parseTruck(self, jsonData):
+    def parseTrucks(self, jsonData):
         data = json.loads(jsonData)
         ret_truck = []
         for truck, values, in data.items():
@@ -158,7 +167,28 @@ class Parser:
             ret_truck.append(new_truck)
         return ret_truck
     
-    
+
+class state:
+    def __init__(self, MetaData: Meta):
+        self.start = MetaData.start
+        self.stop = MetaData.stop
+        self.hangars = MetaData.Hangars
+        self.forklifts = MetaData.forklifts
+        self.trucks = []  
+        self.schedule = {
+            "aircraft": {},
+            "trucks": {},
+            "forklifts": {}
+        } 
+
+    def scheduleAircraft(self, aircraft:Aircraft):
+        #Assign aircraft to hangers, for now do not worry about other vehicles
+        for hangar in self.hangars:
+            if hangar.Aircraft is None:
+                hangar.Aircraft = aircraft
+                aircraft.departure = aircraft.arrival + 20
+
+
 
 
     
@@ -172,6 +202,7 @@ def read_file(filename):
 def main():
     parse = Parser()
 
+
     meta = read_file(sys.argv[1])
     print(parse.parseMeta(meta))
 
@@ -181,8 +212,10 @@ def main():
 
 
     trucks = read_file(sys.argv[3])
-    print(parse.parseTruck(trucks))
+    print(parse.parseTrucks(trucks))
 
+    #In this order
+    #Aircraft > Forklift > Truck
     #AND ALSO OUTPUT FILE SOMEWHERE 
     #WRITE TO SCHEDULE PATH OR SMTHN
     schedule_path = sys.argv[4]
