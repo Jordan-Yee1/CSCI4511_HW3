@@ -217,7 +217,10 @@ class state:
         for forklift in self.Forklifts:
             lastJob = forklift.schedule[len(forklift.schedule)]["Job"] 
             if lastJob == "Unload":
-                if lastJob["Time"] ==  
+                #Will add if the lat job was an unload. Because unloads take 20 mins it will schedule the unload for 20 mins after
+                self.schedule["forklifts"][forklift.id] = forklift.addLoad(hangar, lastJob["Time"] + 20)
+                return True 
+        return False #No fork lifts
         
 
 
