@@ -38,12 +38,12 @@ class Aircraft:
 class Hangar:
     def __init__(self, id):
         self.id = id
-        self.aircraft = None
+        self.aircraft:Aircraft = None
         self.pallets = 0
-        self.trucks = []
-        self.forklifts = []
+        self.trucks:Truck = []
+        self.forklifts:Forklifts = []
 
-    def addPlane(self, aircraft):
+    def addPlane(self, aircraft:Aircraft):
         self.aircraft = aircraft
 
     def addTruck(self, truck):
@@ -72,14 +72,23 @@ class Forklifts:
         self.id = id
         self.schedule = []
 
-    def addUnload(self, aircraft:Aircraft, time, job):
-
+    def addUnload(self, hangar:Hangar, time):
         newJob = {
-            "Hangar": aircraft.hangar,   #ID of hangar
+            "Hangar": hangar.id,   #ID of hangar
             "Time": time,       #time in format
-            "Job": job          #Either load or unload
+            "Job": "Unload"          
             }
         
+        self.schedule.append(newJob)
+        return newJob
+
+    def addLoad(self, hangar:Hangar, time):
+        newJob = {
+            "Hangar": hangar.id,
+            "Time": time,       #time in format
+            "Job": "load"          
+            }
+
         self.schedule.append(newJob)
     
     def __str__(self):
@@ -189,15 +198,23 @@ class state:
         print("No hangars possible")
         return False
 
-    #The add job assumes that the aircraft is in a hangar, it will get the hangar information through the aircraft
-    def unloadForklift(self, aircraft):
-        if aircraft.hangar is None:
-            print(f"No Hangar{aircraft}")
+    #Unloading the forklift assumes that there is a plane in the hanger, if there is not, return False
+    def unloadForklift(self, hangar:Hangar):
+        if hangar.aircraft is None:
+            print(f"No Aircraft{hangar}")
             return False
-        for forklift in self.forklifts.values():
-            if len(forklift.schedule) == 0: #If fork lift schedule is empty assign to plane
-                for i in range(aircraft.getCargo()):
-                    forklift.addUnload(aircraft, aircraft.arrival , "Unload")
+        for forklift in self.forklifts:
+            if len(forklift.schedule) == 0:
+                #Both adds the new job to the schedule here and the individual fork lift schedule
+                self.schedule["forklifts"][forklift.id] = forklift.addUnload(hangar, hangar.aircraft.arrival)
+                return True
+        return False #No fork lifts found sutiable
+    
+    def loadForklift(self, hangar:Hangar):
+        if len(hangar.trucks) == 0:
+            print(f"No Truck{hangar}")
+            return False
+        
 
 
     #Can be run to do a full scan of the hangars/planes/trucks/forklifts to see if any constraints are being violated
