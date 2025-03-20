@@ -214,6 +214,10 @@ class state:
         if len(hangar.trucks) == 0:
             print(f"No Truck{hangar}")
             return False
+        for forklift in self.Forklifts:
+            lastJob = forklift.schedule[len(forklift.schedule)]["Job"] 
+            if lastJob == "Unload":
+                if lastJob["Time"] ==  
         
 
 
