@@ -7,46 +7,6 @@ import sys
 #https://www.w3schools.com/python/python_json.asp Referenced for json parsong technique
 #https://www.digitalocean.com/community/tutorials/python-str-repr-functions Referenced proper printing using __str__ and __repr__
 
-'''
-Variables:
-Arrivals/Aircraft
-Hangars
-Forklifts
-Trucks
-
-{
-    "aircraft": {
-        "The Aircraft": {
-            "Hangar": "The Hangar",
-            "Arrival": 800,
-            "Departure": 820
-        }
-    },
-    "trucks": {
-        "The Truck": {
-            "Hangar": "The Hangar",
-            "Arrival": 820,
-            "Departure": 825
-        }
-    },
-    "forklifts": {
-        "The Forklift": [
-            {
-                "Hangar": "The Hangar",
-                "Time": 800,
-                "Job": "Unload"
-            },
-            {
-                "Hangar": "The Hangar",
-                "Time": 825,
-                "Job": "Load"
-            }
-        ]
-    }
-}
-
-'''
-
 
 class Aircraft:
     def __init__(self, id, arrival, cargo):
@@ -240,14 +200,6 @@ class state:
                     forklift.addUnload(aircraft, aircraft.arrival , "Unload")
 
 
-
-        def add_job(self, hangar, time, job):
-        newJob = {
-            "Hangar": hangar,   #ID of hangar
-            "Time": time,       #time in format
-            "Job": job          #Either load or unload
-            }
-        
     #Can be run to do a full scan of the hangars/planes/trucks/forklifts to see if any constraints are being violated
     def checkConstrain(self):
         #First check locational constraints, like is there a forklift scheduled multiple times
@@ -257,7 +209,15 @@ class state:
 
         #Third check for timeoverlap constrains, meaning that two or more objects cannot be in one place at a time.
         #This is different from the previous checks in that it will be comparing multiple objects against each other
+
+        #Fourth is functional constraints, a forklift cant unload a plane that has no more pallets for example
+        
         return False
+    
+
+
+
+
 def read_file(filename):
     with open(filename, "r") as file:
         return file.read()
