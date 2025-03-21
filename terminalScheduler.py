@@ -101,8 +101,18 @@ class Forklifts:
 class Truck:
     def __init__(self, id, Time):
         self.id = id
-        self.time = Time      
+        self.time = Time        #The time for arrival of truck (ignore naming conventions, this code is a bomb waiting for the wrong variable name to be changed then everything blows up)
         self.Hangar = None
+        self.job = None #Will be a dict for the schedule function, trucks can only have one job once one has been assigned
+
+    def addLoad(self, hangar:Hangar, arrivalTime, departureTime):
+        newJob = {
+            "Hangar": hangar.id,
+            "Arrival": arrivalTime,
+            "Departure": departureTime
+        }
+        self.job = newJob
+        return newJob
     
     def __str__(self):
         return f'Truck id : {self.id} | Arrival Time : {self.time} | Hangar : {self.Hangar}'  
@@ -222,6 +232,18 @@ class state:
                 return True 
         return False #No fork lifts
         
+    def scheduleTrcuk(self, truck:Truck):
+        for hangar in self.hangars:
+            if len(hangar.trucks) == 0 and hangar.pallets>0: #WIll naively go to first hangar available with pallets
+                hangar.trucks.addTruck(truck.id)
+                earliestArrival = max(self.start, truck.time)
+
+                #Departure time will be the timing of having a fork lift be able to load onto the truck
+                self.schedule["trucks"][truck.id] = truck.addLoad(hangar, earliestArrival, departureTime)
+                return True
+        return False
+
+
 
 
     #Can be run to do a full scan of the hangars/planes/trucks/forklifts to see if any constraints are being violated
