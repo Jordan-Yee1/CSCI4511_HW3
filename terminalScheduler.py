@@ -90,6 +90,26 @@ class Forklifts:
             }
 
         self.schedule.append(newJob)
+
+    #Is the forklift not scheduled for a job during a block of time
+    #Ex: Has job 800 for unload (takes 20 mins) and checking for 820 for load (5mins)
+    # if 800+20 = 820  > startTime conflict found
+    # also check upper bound 
+    def isFree(self, start, duration):
+        if len(self.schedule) == 0:
+            return True
+        
+        for job in self.schedule:
+            lastTime = job["Time"]
+            lastDuration = -1
+            if job["Job"] == "Unload":
+                lastDuration = 20
+            else:
+                lastDuration = 5
+            lastJob = lastTime + lastDuration
+            if lastJob > start:
+                return False
+
     
     def __str__(self):
         return f'Forklift id : {self.id} | Schedule : {self.schedule}\n' 
@@ -225,18 +245,21 @@ class state:
             print(f"No Truck{hangar}")
             return False
         for forklift in self.Forklifts:
-            lastJob = forklift.schedule[len(forklift.schedule)]["Job"] 
+            lastJob = forklift.schedule[len(forklift.schedule) - 1]["Job"] 
             if lastJob == "Unload":
                 #Will add if the lat job was an unload. Because unloads take 20 mins it will schedule the unload for 20 mins after
                 self.schedule["forklifts"][forklift.id] = forklift.addLoad(hangar, lastJob["Time"] + 20)
                 return True 
         return False #No fork lifts
         
-    def scheduleTrcuk(self, truck:Truck):
+    def scheduleTruck(self, truck:Truck):
         for hangar in self.hangars:
             if len(hangar.trucks) == 0 and hangar.pallets>0: #WIll naively go to first hangar available with pallets
-                hangar.trucks.addTruck(truck.id)
+                hangar.addTruck(truck.id)
                 earliestArrival = max(self.start, truck.time)
+
+                departureTime = -1
+                for forklift in self.forklifts:
 
                 #Departure time will be the timing of having a fork lift be able to load onto the truck
                 self.schedule["trucks"][truck.id] = truck.addLoad(hangar, earliestArrival, departureTime)
