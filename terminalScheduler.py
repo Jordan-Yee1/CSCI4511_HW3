@@ -96,6 +96,10 @@ class Forklifts:
     # if 800+20 = 820  > startTime conflict found
     # also check upper bound 
     def isFree(self, start, duration):
+        if duration == 0:
+            print(f"Invalid duration : {duration}")
+            return False
+        
         if len(self.schedule) == 0:
             return True
         
@@ -106,9 +110,18 @@ class Forklifts:
                 lastDuration = 20
             else:
                 lastDuration = 5
-            lastJob = lastTime + lastDuration
-            if lastJob > start:
-                return False
+            lastJob = lastTime + lastDuration       #Or the end of the last job
+
+            #If the start is before the end of the lastJob then return false
+            if start < lastJob: return False
+            #If the new job is completely inside the oldjob
+            if start > lastTime and start + duration < lastJob: return False
+
+            if 
+            
+
+        return True
+
 
     
     def __str__(self):
